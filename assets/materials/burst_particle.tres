@@ -1,0 +1,19 @@
+; Fx one-shot burst particle template. Color is tinted per-event via
+; Assets.MaterialTinted() — this sets the structure (turbulence, gravity, spread).
+[gd_resource type="ParticleProcessMaterial" format=3 load_steps=2]
+
+[resource]
+direction = Vector3(0, 1, 0)
+spread = 35.0
+gravity = Vector3(0, -14, 0)
+initial_velocity_min = 4.0
+initial_velocity_max = 9.0
+scale_min = 0.6
+scale_max = 1.2
+color = Color(1, 1, 1, 1)
+emission_shape = 2
+emission_sphere_radius = 0.25
+turbulence_enabled = true
+turbulence_noise_strength = 2.5
+turbulence_influence_max = 0.35
+hue_variation_max = 0.08

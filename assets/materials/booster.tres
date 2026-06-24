@@ -1,0 +1,10 @@
+; Base material for boost pad plates. Tinted per-instance from the level spec.
+[gd_resource type="StandardMaterial3D" format=3 load_steps=2]
+
+[resource]
+albedo_color = Color(1, 0.55, 0.20, 1)
+roughness = 0.3
+metallic = 0.0
+emission_enabled = true
+emission = Color(1, 0.55, 0.20, 1)
+emission_energy_multiplier = 1.2

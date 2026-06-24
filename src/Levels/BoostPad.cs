@@ -14,6 +14,7 @@ public partial class BoostPad : Area3D
 
     private MeshInstance3D _plate;
     private MeshInstance3D _chevron;
+    private StandardMaterial3D _plateMat;
     private float _pulseT;
 
     public override void _Ready()
@@ -22,13 +23,16 @@ public partial class BoostPad : Area3D
         col.Shape = new BoxShape3D { Size = new Vector3(2.6f, 0.4f, 2.6f) };
         AddChild(col);
 
-        // Recessed glowing plate.
+        // Recessed glowing plate — tinted per-instance (and mutable; pulsed in _Process).
         var plateMesh = new BoxMesh { Size = new Vector3(2.4f, 0.2f, 2.4f) };
-        plateMesh.Material = Procedural.Candy(Tint, emission: 1.2f, rough: 0.3f);
+        _plateMat = Assets.MaterialTinted("booster", Tint);
+        _plateMat.EmissionEnergyMultiplier = 1.2f;
+        plateMesh.Material = _plateMat;
         _plate = new MeshInstance3D { Mesh = plateMesh, Position = new Vector3(0, 0.05f, 0) };
         AddChild(_plate);
 
         // Chevron arrows — a couple of thin glowing boxes angled forward.
+        var chevMat = Assets.Material("chevron");
         for (int i = 0; i < 3; i++)
         {
             var chev = new MeshInstance3D
@@ -36,7 +40,7 @@ public partial class BoostPad : Area3D
                 Mesh = new BoxMesh { Size = new Vector3(1.4f, 0.06f, 0.35f) },
                 Position = new Vector3(0, 0.16f, -0.7f + i * 0.6f),
             };
-            chev.MaterialOverride = Procedural.Glow(Palette.BoostCore, 3f);
+            chev.MaterialOverride = chevMat;
             chev.Rotation = new Vector3(0, 0, 0);
             if (i == 0) _chevron = chev;
             _plate.AddChild(chev);
@@ -49,8 +53,8 @@ public partial class BoostPad : Area3D
     {
         _pulseT += (float)delta;
         float p = 0.85f + Mathf.Sin(_pulseT * 6f) * 0.15f;
-        if (_plate.MaterialOverride is StandardMaterial3D m)
-            m.EmissionEnergyMultiplier = 1.0f + p;
+        if (_plateMat != null)
+            _plateMat.EmissionEnergyMultiplier = 1.0f + p;
         // March chevrons forward to imply motion.
         foreach (var c in _plate.GetChildren())
             if (c is MeshInstance3D mi)

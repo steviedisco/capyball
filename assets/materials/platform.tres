@@ -1,0 +1,12 @@
+; Base "candy" material for platforms/ramps/movers. Color is tinted per-instance
+; at runtime via Assets.MaterialTinted() — this sets the structure (emission,
+; roughness) and acts as the template.
+[gd_resource type="StandardMaterial3D" format=3 load_steps=2]
+
+[resource]
+albedo_color = Color(1, 1, 1, 1)
+roughness = 0.35
+metallic = 0.0
+emission_enabled = true
+emission = Color(1, 1, 1, 1)
+emission_energy_multiplier = 0.25

@@ -25,10 +25,11 @@ public partial class Bumper : Area3D
         {
             Mesh = new CylinderMesh { TopRadius = 0.85f, BottomRadius = 0.85f, Height = 1.4f },
         };
-        _core.MaterialOverride = Procedural.Candy(Tint, emission: 0.8f, rough: 0.3f);
+        // Tinted per-instance and mutable (flashed in _Process).
+        _core.MaterialOverride = Assets.MaterialTinted("bumper_core", Tint);
         AddChild(_core);
 
-        var ring = Procedural.GlowRing(0.95f, new Color(1f, 1f, 1f), 0.12f);
+        var ring = Procedural.GlowRing(0.95f, Assets.Material("bumper_ring"), 0.12f);
         ring.Position = new Vector3(0, 0.8f, 0);
         AddChild(ring);
 

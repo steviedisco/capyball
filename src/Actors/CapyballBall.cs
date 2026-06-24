@@ -59,12 +59,12 @@ public partial class CapyballBall : RigidBody3D
         col.Shape = sphere;
         AddChild(col);
 
-        // Visual shell.
-        _shell = Procedural.BallShell(0.62f);
+        // Visual shell — disk-based material.
+        _shell = Procedural.BallShell(0.62f, Assets.MaterialMutable("ball_shell"));
         AddChild(_shell);
 
-        // Capybara model, parented so we can wobble it independently.
-        _model = Procedural.CapybaraModel();
+        // Capybara model — authored scene loaded from disk.
+        _model = Assets.Capybara().Instantiate<Node3D>();
         _model.Scale = Vector3.One * 0.55f;
         AddChild(_model);
 
@@ -308,31 +308,11 @@ public partial class CapyballBall : RigidBody3D
             Emitting = false,
             FixedFps = 60,
         };
-        var mat = new ParticleProcessMaterial
-        {
-            Direction = Vector3.Back,
-            Spread = 12f,
-            Gravity = Vector3.Zero,
-            InitialVelocityMin = 0.6f,
-            InitialVelocityMax = 1.6f,
-            ScaleMin = 0.6f,
-            ScaleMax = 1.1f,
-            Color = Palette.BallRim,
-            EmissionShape = ParticleProcessMaterial.EmissionShapeEnum.Sphere,
-            EmissionSphereRadius = 0.4f,
-        };
-        p.ProcessMaterial = mat;
+        // Particle process material + draw material loaded from disk (mutable copies,
+        // since UpdateTrail() mutates them per frame).
+        p.ProcessMaterial = (ParticleProcessMaterial)Assets.ParticleMaterial("trail_particle").Duplicate();
         var quad = new QuadMesh { Size = new Vector2(0.3f, 0.3f) };
-        var qmat = new StandardMaterial3D
-        {
-            AlbedoColor = Palette.BallRim,
-            EmissionEnabled = true,
-            Emission = Palette.BallRim,
-            EmissionEnergyMultiplier = 2.0f,
-            ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
-            BillboardMode = BaseMaterial3D.BillboardModeEnum.Particles,
-        };
-        quad.Material = qmat;
+        quad.Material = Assets.MaterialMutable("trail");
         p.DrawPass1 = quad;
         return p;
     }
@@ -348,38 +328,10 @@ public partial class CapyballBall : RigidBody3D
             FixedFps = 60,
             Position = new Vector3(0, 0, -0.2f),
         };
-        var mat = new ParticleProcessMaterial
-        {
-            Direction = Vector3.Back,
-            Spread = 18f,
-            Gravity = Vector3.Zero,
-            InitialVelocityMin = 4f,
-            InitialVelocityMax = 8f,
-            ScaleMin = 0.8f,
-            ScaleMax = 1.6f,
-            ColorRamp = new GradientTexture1D { Gradient = MakeFlameRamp() },
-            EmissionShape = ParticleProcessMaterial.EmissionShapeEnum.Sphere,
-            EmissionSphereRadius = 0.25f,
-        };
-        p.ProcessMaterial = mat;
+        p.ProcessMaterial = Assets.ParticleMaterial("boost_flame_particle");
         var quad = new QuadMesh { Size = new Vector2(0.28f, 0.28f) };
-        var qmat = new StandardMaterial3D
-        {
-            ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
-            BillboardMode = BaseMaterial3D.BillboardModeEnum.Particles,
-            VertexColorUseAsAlbedo = true,
-        };
-        quad.Material = qmat;
+        quad.Material = Assets.Material("boost_flame");
         p.DrawPass1 = quad;
         return p;
-    }
-
-    private static Gradient MakeFlameRamp()
-    {
-        var g = new Gradient();
-        g.SetColor(0, Palette.BoostCore);
-        g.AddPoint(0.4f, Palette.BoostFlame);
-        g.AddPoint(1.0f, new Color(1f, 0.2f, 0.1f, 0f));
-        return g;
     }
 }

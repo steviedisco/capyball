@@ -4,8 +4,11 @@ A juicy, chunky, Sega-bright **Super Monkey Ball** clone starring a capybara.
 Roll a capybara around inside a glowing ball, collect melons, hit boost pads,
 ricochet off bumpers, and reach the glowing goal across three escalating stages.
 
-Built in **Godot 4.3 (.NET)** with **C#** — zero external art or audio assets.
-Every model, material, particle, sound, menu, and level is generated in code.
+Built in **Godot 4.3 (.NET)** with **C#**. Visuals are authored disk assets —
+**`.tres` material files** (text, diff-friendly, editable in the Inspector) and an
+**exported capybara `.tscn` mesh scene**. Audio is fully synthesized at runtime
+(no `.wav`/`.ogg` files). Geometry primitives stay inline (a sphere/box is one
+line); the *materials* — the part worth tuning — live on disk in `assets/`.
 
 ![capyball icon](icon.svg)
 
@@ -113,9 +116,17 @@ godot --headless --quit-after 150 res://Main.tscn
 ├── Capyball.sln / .csproj # C# solution for Rider / VS
 ├── Main.tscn / Main.cs    # Root scene + game-flow controller (menu ↔ level)
 ├── icon.svg               # Procedural app icon
+├── assets/                # Disk-based authored assets (editable in Inspector)
+│   ├── materials/         # .tres StandardMaterial3D + ParticleProcessMaterial
+│   │                      #   (static looks + tint templates for per-level colours)
+│   └── meshes/
+│       └── capybara.tscn  # Exported capybara model scene (10 meshes)
+├── tools/
+│   └── ExportCapybara.cs  # One-shot headless tool: builds & saves capybara.tscn
 └── src/
-    ├── Palette.cs         # Shared Sega-bright colour palette
-    ├── Procedural.cs      # Procedural mesh + material builders (no asset files)
+    ├── Palette.cs         # Shared Sega-bright colour palette (source of truth)
+    ├── Assets.cs          # Disk-resource loader: Material / MaterialTinted / Mutable
+    ├── Procedural.cs      # Inline primitive-mesh assemblers using disk materials
     ├── Fx.cs              # Centralized particle bursts / shake / hit-stop
     ├── Synth.cs           # Runtime procedural audio engine
     ├── GameState.cs       # Progress / best-time persistence autoload
@@ -136,13 +147,41 @@ godot --headless --quit-after 150 res://Main.tscn
 
 ---
 
+## 🎨 Editing the look
+
+All materials are plain-text `.tres` files in `assets/materials/`. Open any in
+the Godot Inspector (or even a text editor) to tweak colour, emission, roughness,
+particle spread, etc. — no code changes needed. A few call out the intended use:
+
+- **Static looks** (`capy_*`, `ball_shell`, `goal_*`, `melon*`, `void_plane`,
+  `sparkle`, `chevron`, `bumper_ring`) are shared read-only resources.
+- **Tint templates** (`platform`, `platform_rim`, `booster`, `bumper_core`,
+  `burst`) are recoloured per-instance by `Assets.MaterialTinted(...)` so each
+  platform/booster/bumper keeps its own coloured copy. Edit the *structure*
+  (roughness, emission flags) here; the colour comes from the level spec.
+- **Mutable** materials (`trail`, `ball_shell`) are duplicated per-instance
+  because they're animated at runtime.
+
+To re-export the capybara mesh (e.g. after changing its primitive params):
+
+```bash
+godot --headless --script res://tools/ExportCapybara.cs
+```
+
+---
+
 ## 🧪 Design notes
 
-- **No scene files for gameplay.** Levels are plain C# data (`LevelSpec`)
-  consumed by a single `LevelScene` runtime. This keeps authoring terse and
-  diff-friendly, and means the whole game fits in a handful of scripts.
-- **No external assets** by design — the repo is tiny, builds anywhere, and
-  every visual/audio is tweakable from code.
+- **Levels are data, not scenes.** Each level is a plain C# `LevelSpec`
+  consumed by a single `LevelScene` runtime. Authoring stays terse and
+  diff-friendly; the whole game fits in a handful of scripts.
+- **Mixed asset strategy.** Materials and the capybara model live on disk
+  (Inspector-editable `.tres`/`.tscn`); trivial primitive geometry stays inline;
+  all audio is synthesized at runtime. This keeps the look tunable without code
+  while staying asset-light.
+- **`Palette.cs` remains the source of truth for colour** — the `.tres` files
+  encode those exact values, and per-instance tinting reads from the palette via
+  the level specs.
 - **Physics:** the ball is a `RigidBody3D` with a camera-relative steering model
   and a hard speed cap for arcade feel; ground is detected via a shape query.
 

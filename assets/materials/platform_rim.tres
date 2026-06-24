@@ -1,0 +1,11 @@
+; Base rim-glow material for platforms. Tinted brighter per-instance at runtime.
+[gd_resource type="StandardMaterial3D" format=3 load_steps=2]
+
+[resource]
+albedo_color = Color(1, 1, 1, 1)
+roughness = 0.0
+metallic = 0.0
+shading_mode = 0
+emission_enabled = true
+emission = Color(1, 1, 1, 1)
+emission_energy_multiplier = 1.6

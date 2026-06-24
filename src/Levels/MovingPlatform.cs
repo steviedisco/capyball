@@ -18,7 +18,11 @@ public partial class MovingPlatform : AnimatableBody3D
 
     public override void _Ready()
     {
-        var mi = Procedural.PlatformBox(Size, Tint, emission: 0.3f);
+        var faceMat = Assets.MaterialTinted("platform", Tint);
+        faceMat.EmissionEnergyMultiplier = 0.3f;
+        var rimMat = Assets.MaterialTinted("platform_rim",
+            new Color(Mathf.Min(1, Tint.R + 0.25f), Mathf.Min(1, Tint.G + 0.25f), Mathf.Min(1, Tint.B + 0.25f)));
+        var mi = Procedural.PlatformBox(Size, faceMat, rimMat);
         AddChild(mi);
         // Synthesize a collision box matching visuals.
         var col = new CollisionShape3D();

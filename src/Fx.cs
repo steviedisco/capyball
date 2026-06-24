@@ -79,36 +79,14 @@ public partial class Fx : Node
             VisibilityAabb = new Aabb(new Vector3(-8, -8, -8), new Vector3(16, 16, 16)),
         };
 
-        var mat = new ParticleProcessMaterial
-        {
-            Direction = Vector3.Up,
-            Spread = 35f,
-            Gravity = Vector3.Down * 14f,
-            InitialVelocityMin = 4f,
-            InitialVelocityMax = 9f,
-            ScaleMin = 0.6f,
-            ScaleMax = 1.2f,
-            Color = color,
-            EmissionShape = ParticleProcessMaterial.EmissionShapeEnum.Sphere,
-            EmissionSphereRadius = 0.25f,
-            TurbulenceEnabled = true,
-            TurbulenceNoiseStrength = 2.5f,
-            TurbulenceInfluenceMax = 0.35f,
-            HueVariationMax = 0.08f,
-        };
+        // Particle process material loaded from disk, tinted to the event colour.
+        var mat = (ParticleProcessMaterial)Assets.ParticleMaterial("burst_particle").Duplicate();
+        mat.Color = color;
         p.ProcessMaterial = mat;
 
         var quad = new QuadMesh { Size = new Vector2(0.22f, 0.22f) };
-        var qmat = new StandardMaterial3D
-        {
-            AlbedoColor = color,
-            EmissionEnabled = true,
-            Emission = color * 1.6f,
-            EmissionEnergyMultiplier = 2.0f,
-            ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
-            VertexColorUseAsAlbedo = true,
-            BillboardMode = BaseMaterial3D.BillboardModeEnum.Particles,
-        };
+        var qmat = Assets.MaterialTinted("burst", color);
+        qmat.Emission = color * 1.6f;
         quad.Material = qmat;
         p.DrawPass1 = quad;
 

@@ -1,0 +1,9 @@
+; Boost flame color ramp: bright core -> orange flame -> faded red.
+[gd_resource type="GradientTexture1D" format=3 load_steps=2]
+
+[sub_resource type="Gradient" id="grad"]
+offsets = PackedFloat32Array(0, 0.4, 1)
+colors = PackedColorArray(1, 0.95, 0.55, 1, 1, 0.55, 0.2, 1, 1, 0.2, 0.1, 0)
+
+[resource]
+gradient = SubResource("grad")

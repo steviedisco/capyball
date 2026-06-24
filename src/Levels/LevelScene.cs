@@ -41,7 +41,8 @@ public partial class LevelScene : Node3D
         // Static platforms.
         foreach (var c in Spec.Chunks)
         {
-            var box = Procedural.PlatformBox(c.Size, c.Color, c.Emission);
+            var (faceMat, rimMat) = PlatformMaterials(c.Color, c.Emission);
+            var box = Procedural.PlatformBox(c.Size, faceMat, rimMat);
             box.Position = c.Pos;
             var body = new StaticBody3D();
             body.AddChild(box);
@@ -53,7 +54,8 @@ public partial class LevelScene : Node3D
         // Ramps (rotated boxes).
         foreach (var r in Spec.Ramps)
         {
-            var box = Procedural.PlatformBox(r.Size, r.Color, 0.3f);
+            var (faceMat, rimMat) = PlatformMaterials(r.Color, 0.3f);
+            var box = Procedural.PlatformBox(r.Size, faceMat, rimMat);
             box.Position = r.Pos;
             var body = new StaticBody3D();
             body.AddChild(box);
@@ -194,5 +196,17 @@ public partial class LevelScene : Node3D
         {
             Main.Instance.GotoLevel(next);
         }
+    }
+
+    /// <summary>Builds a tinted face + brighter rim material pair for a platform,
+    /// each an independent instance so per-chunk colour never bleeds across platforms.</summary>
+    private static (Material face, Material rim) PlatformMaterials(Color color, float emission)
+    {
+        var faceMat = Assets.MaterialTinted("platform", color);
+        faceMat.EmissionEnergyMultiplier = emission;
+        Color rimColor = new(
+            Mathf.Min(1, color.R + 0.25f), Mathf.Min(1, color.G + 0.25f), Mathf.Min(1, color.B + 0.25f));
+        var rimMat = Assets.MaterialTinted("platform_rim", rimColor);
+        return (faceMat, rimMat);
     }
 }

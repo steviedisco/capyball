@@ -1,0 +1,10 @@
+; Base material for bumper cores. Tinted per-instance from the level spec.
+[gd_resource type="StandardMaterial3D" format=3 load_steps=2]
+
+[resource]
+albedo_color = Color(1, 0.32, 0.58, 1)
+roughness = 0.3
+metallic = 0.0
+emission_enabled = true
+emission = Color(1, 0.32, 0.58, 1)
+emission_energy_multiplier = 0.8

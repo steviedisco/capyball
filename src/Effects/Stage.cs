@@ -88,14 +88,7 @@ public static class Stage
     public static MeshInstance3D BuildVoidPlane(Node addTo, float y = -25f, float size = 400f)
     {
         var plane = new PlaneMesh { Size = new Vector2(size, size) };
-        plane.Material = new StandardMaterial3D
-        {
-            AlbedoColor = new Color(0.04f, 0.06f, 0.18f),
-            EmissionEnabled = true,
-            Emission = new Color(0.10f, 0.16f, 0.40f),
-            EmissionEnergyMultiplier = 0.6f,
-            Roughness = 1f,
-        };
+        plane.Material = Assets.Material("void_plane");
         var mi = new MeshInstance3D { Mesh = plane, Position = new Vector3(0, y, 0) };
         addTo.AddChild(mi);
         return mi;
@@ -104,7 +97,8 @@ public static class Stage
     /// <summary>Adds a slowly tumbling field of distant decorative shapes for depth sparkle.</summary>
     public static void AddDistantSparkles(Node addTo, int count, float radius, float height)
     {
-        var mat = Procedural.Glow(new Color(1f, 0.95f, 0.7f), 2.5f);
+        // Shared read-only glow material loaded from disk.
+        var mat = Assets.Material("sparkle");
         for (int i = 0; i < count; i++)
         {
             float a = (float)GD.RandRange(0, Mathf.Tau);

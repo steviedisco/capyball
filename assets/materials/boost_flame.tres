@@ -1,0 +1,10 @@
+; Boost flame draw-pass quad material (uses vertex color from the color ramp).
+[gd_resource type="StandardMaterial3D" format=3 load_steps=2]
+
+[resource]
+albedo_color = Color(1, 1, 1, 1)
+roughness = 0.0
+metallic = 0.0
+shading_mode = 0
+billboard_mode = 3
+vertex_color_use_as_albedo = true

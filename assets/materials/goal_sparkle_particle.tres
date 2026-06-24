@@ -1,0 +1,15 @@
+; Goal ambient sparkle particle process material.
+[gd_resource type="ParticleProcessMaterial" format=3 load_steps=2]
+
+[resource]
+direction = Vector3(0, 1, 0)
+spread = 20.0
+gravity = Vector3(0, -2, 0)
+initial_velocity_min = 1.0
+initial_velocity_max = 2.5
+scale_min = 0.3
+scale_max = 0.7
+color = Color(1, 0.95, 0.6, 1)
+hue_variation_max = 0.1
+emission_shape = 3
+emission_box_extents = Vector3(1.0, 1.5, 1.0)

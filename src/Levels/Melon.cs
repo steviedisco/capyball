@@ -28,7 +28,7 @@ public partial class Melon : Area3D
         {
             Mesh = new SphereMesh { Radius = 0.45f, Height = 0.9f, RadialSegments = 24 },
         };
-        _melon.MaterialOverride = Procedural.Candy(new Color(0.30f, 0.78f, 0.36f), emission: 0.35f, rough: 0.45f);
+        _melon.MaterialOverride = Assets.Material("melon");
         _pivot.AddChild(_melon);
 
         // Stem.
@@ -37,7 +37,7 @@ public partial class Melon : Area3D
             Mesh = new CylinderMesh { TopRadius = 0.05f, BottomRadius = 0.08f, Height = 0.25f },
             Position = new Vector3(0, 0.45f, 0),
         };
-        stem.MaterialOverride = Procedural.Candy(new Color(0.35f, 0.55f, 0.25f), 0.1f);
+        stem.MaterialOverride = Assets.Material("melon_stem");
         _pivot.AddChild(stem);
 
         _light = new OmniLight3D

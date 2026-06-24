@@ -1,0 +1,103 @@
+[gd_scene load_steps=17 format=3]
+
+[ext_resource type="Material" path="res://assets/materials/capy_fur.tres" id="1_mgcuo"]
+[ext_resource type="Material" path="res://assets/materials/capy_snout.tres" id="2_vddne"]
+[ext_resource type="Material" path="res://assets/materials/capy_nose.tres" id="3_g8pea"]
+[ext_resource type="Material" path="res://assets/materials/capy_fur_light.tres" id="4_1cjia"]
+[ext_resource type="Material" path="res://assets/materials/capy_eye.tres" id="5_u7bsy"]
+[ext_resource type="Material" path="res://assets/materials/capy_eye_white.tres" id="6_d4523"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_hb5lp"]
+material = ExtResource("1_mgcuo")
+radius = 0.55
+height = 1.1
+
+[sub_resource type="SphereMesh" id="SphereMesh_glp1f"]
+material = ExtResource("1_mgcuo")
+radius = 0.42
+height = 0.84
+
+[sub_resource type="SphereMesh" id="SphereMesh_dsy3k"]
+material = ExtResource("2_vddne")
+radius = 0.24
+height = 0.48
+
+[sub_resource type="SphereMesh" id="SphereMesh_mr54x"]
+material = ExtResource("3_g8pea")
+radius = 0.09
+height = 0.18
+
+[sub_resource type="SphereMesh" id="SphereMesh_vi8qi"]
+material = ExtResource("4_1cjia")
+radius = 0.12
+height = 0.24
+
+[sub_resource type="SphereMesh" id="SphereMesh_mbhrl"]
+material = ExtResource("4_1cjia")
+radius = 0.12
+height = 0.24
+
+[sub_resource type="SphereMesh" id="SphereMesh_v6cps"]
+material = ExtResource("5_u7bsy")
+radius = 0.085
+height = 0.17
+
+[sub_resource type="SphereMesh" id="SphereMesh_fk6jm"]
+material = ExtResource("5_u7bsy")
+radius = 0.085
+height = 0.17
+
+[sub_resource type="SphereMesh" id="SphereMesh_l7lms"]
+material = ExtResource("6_d4523")
+radius = 0.03
+height = 0.06
+
+[sub_resource type="SphereMesh" id="SphereMesh_yfavf"]
+material = ExtResource("6_d4523")
+radius = 0.03
+height = 0.06
+
+[node name="Capybara" type="Node3D"]
+
+[node name="CapyModel" type="Node3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
+
+[node name="Body" type="MeshInstance3D" parent="CapyModel"]
+transform = Transform3D(1, 0, 0, 0, 1.15, 0, 0, 0, 1.4, 0, 0, 0)
+mesh = SubResource("SphereMesh_hb5lp")
+
+[node name="Head" type="MeshInstance3D" parent="CapyModel"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.28, 0.55)
+mesh = SubResource("SphereMesh_glp1f")
+
+[node name="Snout" type="MeshInstance3D" parent="CapyModel"]
+transform = Transform3D(1, 0, 0, 0, 0.8, 0, 0, 0, 1.1, 0, 0.18, 0.85)
+mesh = SubResource("SphereMesh_dsy3k")
+
+[node name="Nose" type="MeshInstance3D" parent="CapyModel"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.24, 1.03)
+mesh = SubResource("SphereMesh_mr54x")
+
+[node name="EarL" type="MeshInstance3D" parent="CapyModel"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.26, 0.56, 0.5)
+mesh = SubResource("SphereMesh_vi8qi")
+
+[node name="EarR" type="MeshInstance3D" parent="CapyModel"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.26, 0.56, 0.5)
+mesh = SubResource("SphereMesh_mbhrl")
+
+[node name="EyeL" type="MeshInstance3D" parent="CapyModel"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.16, 0.36, 0.86)
+mesh = SubResource("SphereMesh_v6cps")
+
+[node name="EyeR" type="MeshInstance3D" parent="CapyModel"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.16, 0.36, 0.86)
+mesh = SubResource("SphereMesh_fk6jm")
+
+[node name="EyeLHi" type="MeshInstance3D" parent="CapyModel"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.13, 0.39, 0.92)
+mesh = SubResource("SphereMesh_l7lms")
+
+[node name="EyeRHi" type="MeshInstance3D" parent="CapyModel"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.19, 0.39, 0.92)
+mesh = SubResource("SphereMesh_yfavf")

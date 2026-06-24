@@ -26,16 +26,16 @@ public partial class Goal : Area3D
 
         // Glowing beam.
         var beamMesh = new CylinderMesh { TopRadius = 0.6f, BottomRadius = 0.9f, Height = 14f };
-        beamMesh.Material = Procedural.Glow(new Color(0.5f, 1.0f, 0.7f), 4f);
+        beamMesh.Material = Assets.Material("goal_beam");
         _beam = new MeshInstance3D { Mesh = beamMesh, Position = new Vector3(0, 6, 0) };
         AddChild(_beam);
 
         // Spinning rings on the ground.
-        _ringA = Procedural.GlowRing(1.4f, new Color(0.5f, 1.0f, 0.7f), 0.16f);
+        _ringA = Procedural.GlowRing(1.4f, Assets.Material("goal_ring_a"), 0.16f);
         _ringA.Position = new Vector3(0, 0.1f, 0);
         AddChild(_ringA);
 
-        _ringB = Procedural.GlowRing(1.0f, new Color(1.0f, 0.95f, 0.5f), 0.12f);
+        _ringB = Procedural.GlowRing(1.0f, Assets.Material("goal_ring_b"), 0.12f);
         _ringB.Position = new Vector3(0, 0.15f, 0);
         AddChild(_ringB);
 
@@ -59,23 +59,9 @@ public partial class Goal : Area3D
     private GpuParticles3D MakeSparkle()
     {
         var p = new GpuParticles3D { Amount = 24, Lifetime = 1.2f, Position = new Vector3(0, 2, 0) };
-        var mat = new ParticleProcessMaterial
-        {
-            Direction = Vector3.Up,
-            Spread = 20f,
-            Gravity = Vector3.Down * 2f,
-            InitialVelocityMin = 1.0f,
-            InitialVelocityMax = 2.5f,
-            ScaleMin = 0.3f,
-            ScaleMax = 0.7f,
-            Color = new Color(1f, 0.95f, 0.6f),
-            HueVariationMax = 0.1f,
-            EmissionShape = ParticleProcessMaterial.EmissionShapeEnum.Box,
-            EmissionBoxExtents = new Vector3(1.0f, 1.5f, 1.0f),
-        };
-        p.ProcessMaterial = mat;
+        p.ProcessMaterial = Assets.ParticleMaterial("goal_sparkle_particle");
         var quad = new QuadMesh { Size = new Vector2(0.2f, 0.2f) };
-        quad.Material = Procedural.Glow(new Color(1f, 0.95f, 0.6f), 3f);
+        quad.Material = Assets.Material("goal_sparkle");
         p.DrawPass1 = quad;
         return p;
     }
