@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=17 format=3 uid="uid://b0o6jvgmhdman"]
 
 [ext_resource type="Material" path="res://assets/materials/capy_fur.tres" id="1_mgcuo"]
 [ext_resource type="Material" path="res://assets/materials/capy_snout.tres" id="2_vddne"]

@@ -61,8 +61,12 @@ public partial class Fx : Node
         var p = MakeOneShot(28, color);
         AddChild(p);
         p.GlobalPosition = pos;
-        // Orient so burst fires along the surface normal.
-        p.GlobalTransform = p.GlobalTransform.LookingAt(pos + normal, Vector3.Up);
+        // Orient so the burst fires along the surface normal. LookingAt throws if
+        // its target axis is parallel to the up vector — pick an up that's never
+        // parallel to the normal (falls back when the normal is straight up/down).
+        Vector3 dir = normal.LengthSquared() > 0.0001f ? normal.Normalized() : Vector3.Up;
+        Vector3 up = Mathf.Abs(dir.Dot(Vector3.Up)) > 0.99f ? Vector3.Forward : Vector3.Up;
+        p.GlobalTransform = p.GlobalTransform.LookingAt(pos + dir, up);
         p.Scale = Vector3.One * scale;
         p.Emitting = true;
     }
