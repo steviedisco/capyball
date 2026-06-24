@@ -199,7 +199,8 @@ knobs at the top (visible in the Inspector too):
 
 - `MaxTiltDeg` (24) — steeper = more aggressive acceleration
 - `TiltSpeed` (9) — higher = tilt responds more instantly (lower = floatier)
-- `GravityScale` (2.0) — overall pull; heavier = snappier, lighter = drifty
+- `BaseGravity` (18) — downward pull strength
+- `GravityMultiplier` (1.0) — overall pull multiplier
 - `LinearDamp` (0.15) — rolling resistance; higher = coasts less
 - `MaxSpeed` (22) — soft cap on horizontal speed
 

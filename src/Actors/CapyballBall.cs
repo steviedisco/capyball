@@ -14,7 +14,8 @@ public partial class CapyballBall : RigidBody3D
     // Tilt feel (the knobs to tune during playtest) ------------------------
     [Export] public float MaxTiltDeg = 24f;       // how steep the gravity tilt can get
     [Export] public float TiltSpeed = 9f;         // how quickly tilt responds to input
-    [Export] public float GravityScale = 2.0f;    // overall pull strength
+    [Export] public float BaseGravity = 18.0f;    // downward pull strength (we drive gravity ourselves)
+    [Export] public float GravityMultiplier = 1.0f; // multiplier on BaseGravity
     [Export] public float LinearDamp = 0.15f;     // mild rolling resistance
     [Export] public float MaxSpeed = 22f;         // soft cap on horizontal speed
     [Export] public float GroundCheckDist = 0.62f;
@@ -133,7 +134,9 @@ public partial class CapyballBall : RigidBody3D
     /// where the steeper the tilt the harder gravity pulls you sideways.</summary>
     private Vector3 TiltedGravity()
     {
-        float g = (float)ProjectSettings.GetSetting("physics/3d/default_gravity", 9.8) * GravityScale;
+        // We drive gravity ourselves (CustomIntegrator + GravityScale=0 on the body),
+        // so use our own base value rather than the project setting.
+        float g = BaseGravity * GravityMultiplier;
 
         // Build the horizontal lean in the camera frame. _tiltX is the forward/back
         // tilt (input.Y), _tiltZ is the left/right tilt (-input.X). tan(angle) gives
@@ -150,12 +153,15 @@ public partial class CapyballBall : RigidBody3D
     // Custom integration: apply tilted gravity + light damping, detect landings.
     public override void _IntegrateForces(PhysicsDirectBodyState3D state)
     {
-        // Apply tilted gravity as a force over this step.
+        // Drive gravity directly into velocity. With CustomIntegrator=true, force
+        // application via ApplyCentralForce can be silently dropped by the solver in
+        // some configs, so integrate the acceleration ourselves for reliability.
+        float step = (float)state.Step;
         Vector3 g = TiltedGravity();
-        state.ApplyCentralForce(g * state.Step);
+        state.LinearVelocity += g * step;
 
         // Mild linear damping for stability / so it doesn't accelerate forever.
-        state.LinearVelocity *= Mathf.Max(0f, 1f - LinearDamp * (float)state.Step);
+        state.LinearVelocity *= Mathf.Max(0f, 1f - LinearDamp * step);
 
         // Soft horizontal speed cap (arcade feel).
         Vector3 h = new(state.LinearVelocity.X, 0, state.LinearVelocity.Z);
