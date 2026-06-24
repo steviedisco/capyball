@@ -1,0 +1,24 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+
+# Mono / C# build output
+.mono/
+data/
+obj/
+[Bb]in/
+*.csproj.user
+*.csproj.old
+*.sln.DotSettings.user
+*.sln.DotSettings
+*.userprefs
+
+# Imported translations (automatically generated from CSV files)
+*.translation
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+.vs/
+.idea/
+*.swp

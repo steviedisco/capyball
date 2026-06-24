@@ -1,0 +1,108 @@
+;
+; Capyball — a juicy Super Monkey Ball style capybara adventure.
+;
+config_version=5
+
+[application]
+
+config/name="Capyball"
+config/description="A Super Monkey Ball style capybara adventure. Juicy, chunky, Sega-bright."
+run/main_scene="res://Main.tscn"
+config/features=PackedStringArray("4.3", "C#")
+config/icon="res://icon.svg"
+
+[autoload]
+
+GameState="*res://src/GameState.cs"
+Fx="*res://src/Fx.cs"
+Synth="*res://src/Synth.cs"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/window_width_override=1600
+window/size/window_height_override=900
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
+window/handheld/orientation=0
+
+[input]
+
+move_left={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":4194319), Object(InputEventKey,"keycode":65), Object(InputEventKey,"keycode":4194319), Object(InputEventJoypadMotion,"axis":0,"axis_value":-1), Object(InputEventJoypadButton,"button_index":14)]
+}
+move_right={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":4194321), Object(InputEventKey,"keycode":68), Object(InputEventKey,"keycode":4194321), Object(InputEventJoypadMotion,"axis":0,"axis_value":1), Object(InputEventJoypadButton,"button_index":15)]
+}
+move_forward={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":4194320), Object(InputEventKey,"keycode":87), Object(InputEventKey,"keycode":4194320), Object(InputEventJoypadMotion,"axis":1,"axis_value":-1), Object(InputEventJoypadButton,"button_index":12)]
+}
+move_back={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":4194322), Object(InputEventKey,"keycode":83), Object(InputEventKey,"keycode":4194322), Object(InputEventJoypadMotion,"axis":1,"axis_value":1), Object(InputEventJoypadButton,"button_index":13)]
+}
+jump={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":32), Object(InputEventMouseButton,"button_index":1), Object(InputEventJoypadButton,"button_index":0)]
+}
+boost={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":4194325), Object(InputEventKey,"keycode":4194325), Object(InputEventJoypadButton,"button_index":1)]
+}
+restart={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":82), Object(InputEventKey,"keycode":82)]
+}
+pause={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":4194305), Object(InputEventKey,"keycode":4194305)]
+}
+ui_left={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":4194319), Object(InputEventKey,"keycode":65)]
+}
+ui_right={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":4194321), Object(InputEventKey,"keycode":68)]
+}
+ui_up={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":4194320), Object(InputEventKey,"keycode":87)]
+}
+ui_down={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":4194322), Object(InputEventKey,"keycode":83)]
+}
+ui_accept={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":90), Object(InputEventKey,"keycode":4194309), Object(InputEventKey,"keycode":90), Object(InputEventJoypadButton,"button_index":0)]
+}
+ui_cancel={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":4194305), Object(InputEventKey,"keycode":4194308)]
+}
+
+[physics]
+
+common/physics_ticks_per_second=60
+3d/physics_engine="Jolt"
+
+[internationalization]
+
+locale/translations=PackedStringArray()
+
+[memory]
+
+limits/message_queue/max_size_mb=64
+
+[rendering]
+
+anti_aliasing/quality/msaa_3d=3
+anti_aliasing/quality/use_taa=true
+environment/defaults/default_clear_color=Color(0.16, 0.45, 0.72, 1)
+textures/canvas_textures/default_texture_filter=0
+2d/snap/snap_2d_transforms_to_pixel=true
