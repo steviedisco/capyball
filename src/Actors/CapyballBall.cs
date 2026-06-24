@@ -3,21 +3,21 @@ using Godot;
 namespace Capyball;
 
 /// <summary>
-/// The hero: a capybara encased in a glowing ball. Authentic Super Monkey Ball
-/// feel — the player does NOT push the ball. Instead, input <b>tilts gravity</b>
-/// (up to <see cref="MaxTiltDeg"/>) so the ball rolls downhill via real physics.
-/// Tilting the opposite way decelerates, then reverses, the roll — the signature
-/// momentum/commitment feel. No jump, no boost; the ball is pure tilt + inertia.
+/// The hero: a capybara encased in a glowing ball. This is a plain rolling
+/// physics body — standard world-down gravity, friction, a soft speed cap, and
+/// landing detection. It does NOT tilt anything.
+///
+/// The tilt mechanic lives in <see cref="LevelScene"/>: it rotates the course
+/// geometry under the ball, so the ball rolls down the real, visible slope
+/// (authentic Super Monkey Ball). The ball + camera sit outside the tilted pivot
+/// so the camera stays upright and you watch the world bank.
 /// </summary>
 public partial class CapyballBall : RigidBody3D
 {
-    // Tilt feel (the knobs to tune during playtest) ------------------------
-    [Export] public float MaxTiltDeg = 24f;       // how steep the gravity tilt can get
-    [Export] public float TiltSpeed = 9f;         // how quickly tilt responds to input
-    [Export] public float BaseGravity = 18.0f;    // downward pull strength (we drive gravity ourselves)
-    [Export] public float GravityMultiplier = 1.0f; // multiplier on BaseGravity
-    [Export] public float LinearDamp = 0.15f;     // mild rolling resistance
-    [Export] public float MaxSpeed = 22f;         // soft cap on horizontal speed
+    // Feel knobs ------------------------------------------------------------
+    [Export] public float GravityMultiplier = 1.4f; // pull strength (on top of project gravity)
+    [Export] public float LinearDamp = 0.15f;       // mild rolling resistance
+    [Export] public float MaxSpeed = 22f;           // soft cap on horizontal speed
     [Export] public float GroundCheckDist = 0.62f;
     [Export] public float GroundCheckRadius = 0.42f;
 
@@ -31,8 +31,6 @@ public partial class CapyballBall : RigidBody3D
     private CameraFollow _cam;
     private GpuParticles3D _trail;
 
-    // Current tilt (X = pitch forward/back, Z = roll left/right), in radians.
-    private float _tiltX, _tiltZ;
     private float _squash = 1f;
     private float _rollTimer;
     private bool _landedThisFrame;
@@ -44,9 +42,8 @@ public partial class CapyballBall : RigidBody3D
         BodyEntered += OnBodyEntered;
 
         Mass = 1.2f;
-        // We integrate gravity ourselves (tilted), so take over the step.
-        CustomIntegrator = true;
-        GravityScale = 0f; // handled in _IntegrateForces
+        // Pure standard physics: world-down gravity scaled by GravityMultiplier.
+        CustomIntegrator = true; // only so we can add a soft speed cap + landing detect
         PhysicsMaterialOverride = new PhysicsMaterial { Friction = 0.85f, Bounce = 0.04f };
 
         // Collision shape — a sphere.
@@ -76,10 +73,6 @@ public partial class CapyballBall : RigidBody3D
 
         Grounded = CheckGround();
 
-        // Read input as a target tilt vector (camera-relative).
-        Vector2 input = ReadInput();
-        UpdateTilt(input, dt);
-
         // Rolling audio cadence.
         _rollTimer -= dt;
         if (_rollTimer <= 0 && Grounded && Speed > 2f)
@@ -102,65 +95,17 @@ public partial class CapyballBall : RigidBody3D
         }
     }
 
-    private Vector2 ReadInput()
-    {
-        Vector2 i = Vector2.Zero;
-        if (Input.IsActionPressed("move_left")) i.X -= 1;
-        if (Input.IsActionPressed("move_right")) i.X += 1;
-        if (Input.IsActionPressed("move_forward")) i.Y += 1;
-        if (Input.IsActionPressed("move_back")) i.Y -= 1;
-        return i.LengthSquared() > 1f ? i.Normalized() : i;
-    }
-
-    /// <summary>Smooth the tilt toward the input-derived target. Input is in the
-    /// camera's frame: forward/back tilts gravity along the camera's forward axis,
-    /// left/right along the camera's right axis.</summary>
-    private void UpdateTilt(Vector2 input, float dt)
-    {
-        // Target tilt in radians.
-        float maxTilt = Mathf.DegToRad(MaxTiltDeg);
-        float targetX = input.Y * maxTilt; // forward input -> gravity tilts forward
-        float targetZ = -input.X * maxTilt; // right input -> gravity tilts right
-
-        float k = 1f - Mathf.Exp(-TiltSpeed * dt);
-        _tiltX = Mathf.Lerp(_tiltX, targetX, k);
-        _tiltZ = Mathf.Lerp(_tiltZ, targetZ, k);
-    }
-
-    /// <summary>The tilted gravity vector, built directly in the camera's frame so
-    /// "forward" always means "away from the camera". The down component stays
-    /// constant (full gravity pulls the ball onto the surface) and a horizontal
-    /// component appears in the tilt direction — exactly like rolling down a slope,
-    /// where the steeper the tilt the harder gravity pulls you sideways.</summary>
-    private Vector3 TiltedGravity()
-    {
-        // We drive gravity ourselves (CustomIntegrator + GravityScale=0 on the body),
-        // so use our own base value rather than the project setting.
-        float g = BaseGravity * GravityMultiplier;
-
-        // Build the horizontal lean in the camera frame. _tiltX is the forward/back
-        // tilt (input.Y), _tiltZ is the left/right tilt (-input.X). tan(angle) gives
-        // the slope ratio: at maxTilt (~24°) this is ~0.44, a strong but controllable lean.
-        Vector3 camF = _cam != null ? _cam.ForwardFlat : Vector3.Forward;
-        Vector3 camR = _cam != null ? _cam.RightFlat : Vector3.Right;
-        Vector3 lean = camF * Mathf.Tan(_tiltX) + camR * Mathf.Tan(-_tiltZ);
-
-        // Full downward gravity keeps the ball glued to the floor; the lean is the
-        // "slope" component that makes it roll.
-        return Vector3.Down * g + lean * g;
-    }
-
-    // Custom integration: apply tilted gravity + light damping, detect landings.
+    // Custom integration: standard gravity + soft speed cap + landing detect.
     public override void _IntegrateForces(PhysicsDirectBodyState3D state)
     {
-        // Drive gravity directly into velocity. With CustomIntegrator=true, force
-        // application via ApplyCentralForce can be silently dropped by the solver in
-        // some configs, so integrate the acceleration ourselves for reliability.
         float step = (float)state.Step;
-        Vector3 g = TiltedGravity();
-        state.LinearVelocity += g * step;
 
-        // Mild linear damping for stability / so it doesn't accelerate forever.
+        // Standard world-down gravity (scaled). The course tilts under us; we just roll.
+        float g = (float)ProjectSettings.GetSetting("physics/3d/default_gravity", 9.8);
+        if (g <= 0f) g = 9.8f;
+        state.LinearVelocity += Vector3.Down * g * GravityMultiplier * step;
+
+        // Mild linear damping for stability.
         state.LinearVelocity *= Mathf.Max(0f, 1f - LinearDamp * step);
 
         // Soft horizontal speed cap (arcade feel).
@@ -199,7 +144,6 @@ public partial class CapyballBall : RigidBody3D
 
     private void OnBodyEntered(Node body)
     {
-        // A light bump FX on collision.
         float rel = LinearVelocity.Length();
         if (rel > 4f)
         {
@@ -281,8 +225,6 @@ public partial class CapyballBall : RigidBody3D
             Emitting = false,
             FixedFps = 60,
         };
-        // Particle process material + draw material loaded from disk (mutable copies,
-        // since UpdateTrail() mutates them per frame).
         p.ProcessMaterial = (ParticleProcessMaterial)Assets.ParticleMaterial("trail_particle").Duplicate();
         var quad = new QuadMesh { Size = new Vector2(0.3f, 0.3f) };
         quad.Material = Assets.MaterialMutable("trail");

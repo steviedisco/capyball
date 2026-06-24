@@ -19,8 +19,18 @@ public partial class LevelScene : Node3D
     public int MelonsCollected { get; private set; }
     public bool Finished { get; private set; }
 
+    // The tilt feel — how steep and how snappy the course banks under input.
+    public float MaxTiltDeg = 26f;
+    public float TiltSpeed = 8f;
+
     private Goal _goal;
     private bool _fell;
+
+    // Everything that banks with the course (geometry + props) lives under this
+    // pivot. The ball + camera + environment are NOT children, so the camera
+    // stays upright while the world visibly tilts — authentic Super Monkey Ball.
+    private Node3D _tilt;
+    private float _tiltX, _tiltZ;
 
     public void Load(string id)
     {
@@ -33,13 +43,17 @@ public partial class LevelScene : Node3D
     {
         Name = "LevelScene";
 
-        // Environment + lighting + post FX.
+        // The tilt pivot — all course geometry is parented to this.
+        _tilt = new Node3D { Name = "TiltPivot" };
+        AddChild(_tilt);
+
+        // Environment + lighting + post FX stay OUTSIDE the pivot (upright).
         Stage.BuildEnvironment(this, Spec.SkyTop, Spec.SkyBottom);
         Stage.BuildVoidPlane(this, y: -22f, size: 600f);
         Stage.AddDistantSparkles(this, count: 18, radius: 80f, height: 30f);
         Stage.AddClouds(this, count: 7, radius: 90f, height: 45f);
 
-        // Static platforms.
+        // Static platforms — under the tilt pivot.
         foreach (var c in Spec.Chunks)
         {
             var (faceMat, rimMat) = PlatformMaterials(c.Color, c.Emission, c.Size);
@@ -48,7 +62,7 @@ public partial class LevelScene : Node3D
             body.AddChild(box);
             var col = new CollisionShape3D { Shape = new BoxShape3D { Size = c.Size } };
             body.AddChild(col);
-            AddChild(body);
+            _tilt.AddChild(body);
             body.GlobalPosition = c.Pos;
         }
 
@@ -62,7 +76,7 @@ public partial class LevelScene : Node3D
             var col = new CollisionShape3D { Shape = new BoxShape3D { Size = r.Size } };
             body.AddChild(col);
             body.RotationDegrees = new Vector3(r.PitchDeg, r.YawDeg, 0);
-            AddChild(body);
+            _tilt.AddChild(body);
             body.GlobalPosition = r.Pos;
         }
 
@@ -78,7 +92,7 @@ public partial class LevelScene : Node3D
             body.AddChild(seg);
             var col = new CollisionShape3D { Shape = new BoxShape3D { Size = w.Size } };
             body.AddChild(col);
-            AddChild(body);
+            _tilt.AddChild(body);
             body.GlobalPosition = w.Pos;
         }
 
@@ -90,7 +104,7 @@ public partial class LevelScene : Node3D
                 PointA = m.A, PointB = m.B, Period = m.Period,
                 Tint = m.Tint, Size = m.Size,
             };
-            AddChild(mp);
+            _tilt.AddChild(mp);
             mp.GlobalPosition = m.A;
         }
 
@@ -99,26 +113,26 @@ public partial class LevelScene : Node3D
         foreach (var ml in Spec.Melons)
         {
             var melon = new Melon { Position = ml.Pos };
-            AddChild(melon);
+            _tilt.AddChild(melon);
         }
 
         // Boost pads.
         foreach (var b in Spec.Boosts)
         {
             var pad = new BoostPad { Direction = b.Dir, Force = b.Force, Tint = b.Tint, Position = b.Pos };
-            AddChild(pad);
+            _tilt.AddChild(pad);
         }
 
         // Bumpers.
         foreach (var bp in Spec.Bumpers)
         {
             var bump = new Bumper { Tint = bp.Tint, Position = bp.Pos };
-            AddChild(bump);
+            _tilt.AddChild(bump);
         }
 
         // Goal.
         _goal = new Goal { Position = Spec.Goal, NextLevelId = Spec.NextId };
-        AddChild(_goal);
+        _tilt.AddChild(_goal);
 
         // Player.
         Player = new CapyballBall();
@@ -144,6 +158,11 @@ public partial class LevelScene : Node3D
     public override void _PhysicsProcess(double delta)
     {
         if (Finished) return;
+
+        // Read tilt input (camera-relative) and bank the course geometry. The ball
+        // sits outside the pivot, so standard world-down gravity then rolls it down
+        // the real, visible slope — authentic Super Monkey Ball.
+        UpdateTilt((float)delta);
 
         Elapsed += (float)delta;
 
@@ -213,6 +232,47 @@ public partial class LevelScene : Node3D
         {
             Main.Instance.GotoLevel(next);
         }
+    }
+
+    /// <summary>Read tilt input (camera-relative), smooth toward the target, and bank
+    /// the course pivot. The ball + camera sit outside the pivot, so the camera
+    /// stays upright while the world visibly tilts and standard gravity rolls the
+    /// ball down the real slope.</summary>
+    private void UpdateTilt(float dt)
+    {
+        // Input vector: Y = forward/back, X = left/right.
+        Vector2 input = Vector2.Zero;
+        if (Input.IsActionPressed("move_left")) input.X -= 1;
+        if (Input.IsActionPressed("move_right")) input.X += 1;
+        if (Input.IsActionPressed("move_forward")) input.Y += 1;
+        if (Input.IsActionPressed("move_back")) input.Y -= 1;
+        if (input.LengthSquared() > 1f) input = input.Normalized();
+
+        // Target tilt angles (radians). forward input banks the course so its far
+        // edge drops (ball rolls away from camera); right input banks it right.
+        float maxTilt = Mathf.DegToRad(MaxTiltDeg);
+        float targetPitch = input.Y * maxTilt;
+        float targetRoll = input.X * maxTilt;
+
+        float k = 1f - Mathf.Exp(-TiltSpeed * dt);
+        _tiltX = Mathf.Lerp(_tiltX, targetPitch, k);
+        _tiltZ = Mathf.Lerp(_tiltZ, targetRoll, k);
+
+        // Apply the bank around the BALL's position, not the world origin — otherwise
+        // a rotation sweeps distant geometry sideways and pulls the floor out from
+        // under the ball. Transform = translateToPivot * rotate * translateBack.
+        Vector3 camRight = Cam != null ? Cam.RightFlat : Vector3.Right;
+        Vector3 camFwd = Cam != null ? Cam.ForwardFlat : Vector3.Forward;
+
+        var bank = new Basis(camRight, _tiltX) * new Basis(camFwd, _tiltZ);
+        bank = bank.Orthonormalized();
+
+        // Pivot around the ball's ground point so the surface stays roughly under it
+        // while the slope forms. This keeps the ball on the course as it banks.
+        Vector3 pivot = Player != null ? new Vector3(Player.GlobalPosition.X, 0, Player.GlobalPosition.Z) : Vector3.Zero;
+        _tilt.GlobalTransform = new Transform3D(Basis.Identity, pivot)
+                              * new Transform3D(bank, Vector3.Zero)
+                              * new Transform3D(Basis.Identity, -pivot);
     }
 
     /// <summary>Builds a tinted face + brighter rim material pair for a platform,

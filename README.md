@@ -40,9 +40,10 @@ runtime (no `.wav`/`.ogg` files). Geometry primitives stay inline; the
 - Gradient skies, fog, sun + ambient lighting, ambient sparkles for depth
 
 **Gameplay**
-- **Tilt-to-roll** physics (authentic Super Monkey Ball): input tilts gravity, the
-  ball rolls downhill via real momentum — no direct force, no instant stop. Tilting
-  opposite decelerates then reverses the roll.
+- **Tilt the world** (authentic Super Monkey Ball): input visibly banks the whole
+  course like a seesaw under the ball, which then rolls down the real slope via
+  standard physics. The ball + camera sit outside the tilt, so the camera stays
+  upright and you watch the world tilt. No jump, no boost — pure tilt + momentum.
 - Roll **through a glowing goal gate** from either side to finish
 - Perimeter **walls** fence each level in
 - Level props: boost pads (sling you forward), bumpers (ricochet), moving platforms
@@ -203,20 +204,21 @@ world size (~4 units) rather than stretching.
 - **`Palette.cs` remains the source of truth for colour** — the `.tres` files
   encode those exact values, and per-instance tinting reads from the palette via
   the level specs.
-- **Physics:** the ball is a `RigidBody3D` with a **custom integrator that tilts
-  gravity** based on input — the ball isn't pushed, it rolls down the tilted
-  "slope" via real momentum (authentic SMB feel). Tilt is camera-relative. Ground
-  is detected via a shape query; a soft speed cap keeps it arcade-tame.
+- **Physics:** the ball is a plain `RigidBody3D` under standard world-down gravity.
+  The tilt mechanic banks the **course geometry** (under a tilt pivot), so the ball
+  rolls down the real, visible slope. The ball + camera live outside the pivot, so
+  the camera stays upright while the world banks — authentic SMB. The pivot rotates
+  around the ball's position so the surface stays under it as it tilts.
+- **Tilt is camera-relative** — "forward" always means "away from the camera".
 
 ## 🎚️ Tuning the feel
 
-Tilt physics are subjective — open `CapyballBall.cs` and adjust the `[Export]`
-knobs at the top (visible in the Inspector too):
+Tilt feel lives on `LevelScene` (`MaxTiltDeg`, `TiltSpeed`) and the ball
+(`GravityMultiplier`, `LinearDamp`, `MaxSpeed` in `CapyballBall.cs`) — all editable:
 
-- `MaxTiltDeg` (24) — steeper = more aggressive acceleration
-- `TiltSpeed` (9) — higher = tilt responds more instantly (lower = floatier)
-- `BaseGravity` (18) — downward pull strength
-- `GravityMultiplier` (1.0) — overall pull multiplier
+- `MaxTiltDeg` (26) — steeper bank = faster roll
+- `TiltSpeed` (8) — higher = the course banks more instantly
+- `GravityMultiplier` (1.4) — pull strength; heavier = snappier
 - `LinearDamp` (0.15) — rolling resistance; higher = coasts less
 - `MaxSpeed` (22) — soft cap on horizontal speed
 
