@@ -74,7 +74,7 @@ public partial class Hud : CanvasLayer
         top.AddChild(_melons);
 
         // Hint (bottom).
-        _hint = MakeLabel("WASD / Arrows to roll  ·  SPACE jump  ·  SHIFT boost  ·  R restart", 16, Palette.UiCream);
+        _hint = MakeLabel("Tilt to roll (WASD / Arrows)  ·  R restart  ·  ESC menu", 16, Palette.UiCream);
         _hint.HorizontalAlignment = HorizontalAlignment.Center;
         _hint.SetAnchorsPreset(Control.LayoutPreset.BottomWide);
         _hint.Position = new Vector2(0, -36);

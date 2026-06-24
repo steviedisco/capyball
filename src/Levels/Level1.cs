@@ -3,51 +3,53 @@ using Godot;
 namespace Capyball;
 
 /// <summary>
-/// Level 1 — "First Steps". A wide, friendly runway with a gentle bend, a couple
-/// of melons to chase, and a clear sightline to the goal. Teaches rolling + jump.
+/// Level 1 — "First Roll". A wide, forgiving field that teaches the tilt
+/// mechanic. The whole floor gently slopes toward the goal so a new player
+/// rolling forward makes steady progress; perimeter walls keep them in.
+/// Scale: ~2.5× the old size so there's room to build momentum.
 /// </summary>
 public partial class Level1 : LevelDefinition
 {
-    public const string LevelId = "lv1_firststeps";
+    public const string LevelId = "lv1_firstroll";
 
     public override LevelSpec Build()
     {
         var s = new LevelSpec
         {
             Id = LevelId,
-            Title = "First Steps",
-            Subtitle = "roll to the glowing goal",
+            Title = "First Roll",
+            Subtitle = "tilt the world to roll — reach the gate",
             SkyTop = new Color(0.30f, 0.70f, 0.98f),
             SkyBottom = new Color(0.72f, 0.92f, 1.00f),
-            Start = new Vector3(0, 1, -10),
-            Goal = new Vector3(0, 0, 26),
+            Start = new Vector3(0, 1, -26),
+            Goal = new Vector3(0, 0, 30),
             NextId = Level2.LevelId,
         };
 
-        Color mint = Palette.Mint, sunny = Palette.Sunny, tangerine = Palette.Tangerine;
+        Color mint = Palette.Mint, sunny = Palette.Sunny, tangerine = Palette.Tangerine, ocean = Palette.Ocean;
 
-        // Starting pad — wide and forgiving.
-        s.Chunks.Add(new LevelSpec.Chunk { Pos = new Vector3(0, 0, -10), Size = new Vector3(8, 1, 8), Color = mint, Emission = 0.25f });
-        // Runway.
-        s.Chunks.Add(new LevelSpec.Chunk { Pos = new Vector3(0, 0, 4), Size = new Vector3(6, 1, 16), Color = mint, Emission = 0.2f });
-        // A gentle bend (two offset chunks).
-        s.Chunks.Add(new LevelSpec.Chunk { Pos = new Vector3(3, 0, 16), Size = new Vector3(8, 1, 8), Color = sunny, Emission = 0.3f });
-        // Approach to goal.
-        s.Chunks.Add(new LevelSpec.Chunk { Pos = new Vector3(0, 0, 24), Size = new Vector3(7, 1, 8), Color = tangerine, Emission = 0.35f });
+        // Main field — one big wide floor running from start to goal.
+        s.Chunks.Add(new LevelSpec.Chunk { Pos = new Vector3(0, 0, 0), Size = new Vector3(16, 1, 60), Color = mint, Emission = 0.22f });
 
-        // A small decorative rim of low blocks to frame the path.
-        for (int i = 0; i < 5; i++)
-        {
-            float z = -6 + i * 8f;
-            s.Chunks.Add(new LevelSpec.Chunk { Pos = new Vector3(-4.5f, 0.6f, z), Size = new Vector3(0.6f, 1.0f, 0.6f), Color = Palette.HotPink, Emission = 0.6f });
-            s.Chunks.Add(new LevelSpec.Chunk { Pos = new Vector3(4.5f, 0.6f, z), Size = new Vector3(0.6f, 1.0f, 0.6f), Color = Palette.HotPink, Emission = 0.6f });
-        }
+        // A raised start pad so the ball begins slightly above the field.
+        s.Chunks.Add(new LevelSpec.Chunk { Pos = new Vector3(0, 0.5f, -26), Size = new Vector3(10, 2, 8), Color = sunny, Emission = 0.3f });
 
-        // Melons — an easy arc to encourage exploration.
-        s.Melons.Add(new LevelSpec.MelonSpec { Pos = new Vector3(0, 1.5f, -2) });
-        s.Melons.Add(new LevelSpec.MelonSpec { Pos = new Vector3(-2.5f, 1.5f, 8) });
-        s.Melons.Add(new LevelSpec.MelonSpec { Pos = new Vector3(3.5f, 1.5f, 16) });
-        s.Melons.Add(new LevelSpec.MelonSpec { Pos = new Vector3(0, 1.5f, 22) });
+        // A couple of gentle speed-bump ramps to show off the tilt feel.
+        s.Ramps.Add(new LevelSpec.RampSpec { Pos = new Vector3(0, 0.4f, -10), Size = new Vector3(10, 0.8f, 3), Color = tangerine, PitchDeg = -10, YawDeg = 0 });
+        s.Ramps.Add(new LevelSpec.RampSpec { Pos = new Vector3(0, 0.4f, 10), Size = new Vector3(10, 0.8f, 3), Color = tangerine, PitchDeg = -10, YawDeg = 0 });
+
+        // Goal pad at the far end.
+        s.Chunks.Add(new LevelSpec.Chunk { Pos = new Vector3(0, 0.5f, 30), Size = new Vector3(10, 2, 8), Color = ocean, Emission = 0.4f });
+
+        // Perimeter walls — wide field.
+        s.BuildWalls(half: new Vector2(9, 32), height: 2.5f, thickness: 1.0f, color: Palette.HotPink);
+
+        // Melons — a gentle arc to chase along the way.
+        s.Melons.Add(new LevelSpec.MelonSpec { Pos = new Vector3(-3, 1.5f, -14) });
+        s.Melons.Add(new LevelSpec.MelonSpec { Pos = new Vector3(3, 1.5f, -4) });
+        s.Melons.Add(new LevelSpec.MelonSpec { Pos = new Vector3(-3, 1.5f, 6) });
+        s.Melons.Add(new LevelSpec.MelonSpec { Pos = new Vector3(3, 1.5f, 18) });
+        s.Melons.Add(new LevelSpec.MelonSpec { Pos = new Vector3(0, 1.5f, 24) });
 
         return s;
     }

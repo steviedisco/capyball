@@ -18,12 +18,17 @@ public class LevelSpec
     public Vector3 Goal = new(0, 0, 20);
     public string NextId = "";
 
+    /// <summary>Half-extents of the rectangular play area (X, Z). When set,
+    /// <see cref="LevelBuilder.BuildWalls"/> auto-generates a perimeter wall ring.</summary>
+    public Vector2 PlayArea = Vector2.Zero;
+
     public readonly List<Chunk> Chunks = new();
     public readonly List<RampSpec> Ramps = new();
     public readonly List<MelonSpec> Melons = new();
     public readonly List<BoostSpec> Boosts = new();
     public readonly List<MovingSpec> Movers = new();
     public readonly List<BumperSpec> Bumpers = new();
+    public readonly List<WallSpec> Walls = new();
 
     public struct Chunk { public Vector3 Pos; public Vector3 Size; public Color Color; public float Emission; }
     public struct RampSpec { public Vector3 Pos; public Vector3 Size; public Color Color; public float PitchDeg; public float YawDeg; }
@@ -31,6 +36,7 @@ public class LevelSpec
     public struct BoostSpec { public Vector3 Pos; public Vector3 Dir; public float Force; public Color Tint; }
     public struct MovingSpec { public Vector3 A; public Vector3 B; public float Period; public Color Tint; public Vector3 Size; }
     public struct BumperSpec { public Vector3 Pos; public Color Tint; }
+    public struct WallSpec { public Vector3 Pos; public Vector3 Size; public Color Color; }
 }
 
 /// <summary>Base class for level definitions. Subclasses fill the spec in Build().

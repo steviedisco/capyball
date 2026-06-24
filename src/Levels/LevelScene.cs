@@ -65,6 +65,19 @@ public partial class LevelScene : Node3D
             body.GlobalPosition = r.Pos;
         }
 
+        // Perimeter walls (chunky rails fencing the play area).
+        foreach (var w in Spec.Walls)
+        {
+            var (faceMat, rimMat) = PlatformMaterials(w.Color, 0.15f);
+            var box = Procedural.PlatformBox(w.Size, faceMat, rimMat);
+            var body = new StaticBody3D();
+            body.AddChild(box);
+            var col = new CollisionShape3D { Shape = new BoxShape3D { Size = w.Size } };
+            body.AddChild(col);
+            AddChild(body);
+            body.GlobalPosition = w.Pos;
+        }
+
         // Moving platforms.
         foreach (var m in Spec.Movers)
         {

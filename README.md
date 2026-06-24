@@ -39,8 +39,12 @@ line); the *materials* — the part worth tuning — live on disk in `assets/`.
 - Gradient skies, fog, sun + ambient lighting, ambient sparkles for depth
 
 **Gameplay**
-- Arcade ball-rolling physics: tilt-to-roll, hard speed cap, air control
-- **Boost** (impulse along facing) and **jump** with ground check
+- **Tilt-to-roll** physics (authentic Super Monkey Ball): input tilts gravity, the
+  ball rolls downhill via real momentum — no direct force, no instant stop. Tilting
+  opposite decelerates then reverses the roll.
+- Roll **through a glowing goal gate** from either side to finish
+- Perimeter **walls** fence each level in
+- Level props: boost pads (sling you forward), bumpers (ricochet), moving platforms
 - Fall detection into the void → retry
 - Best-time + completion persistence (`user://progress.cfg`)
 
@@ -50,25 +54,26 @@ line); the *materials* — the part worth tuning — live on disk in `assets/`.
 
 | Action | Keyboard | Gamepad |
 |--------|----------|---------|
-| Roll   | `WASD` / Arrow keys | Left stick / D-pad |
-| Jump   | `Space` / LMB | A / Cross |
-| Boost  | `Shift` | B / Circle |
+| Tilt to roll | `WASD` / Arrow keys | Left stick / D-pad |
 | Restart level | `R` | — |
 | Back to menu | `Esc` | — |
+
+> No jump, no boost button — pure tilt, like the arcade original.
 
 ---
 
 ## 🗺️ The three levels
 
-Each stage gets a little more complex and introduces a new mechanic.
+Each stage is a walled field; tilt to roll, build momentum, and pass through the
+glowing goal gate (from either side). Each is bigger and trickier than the last.
 
-1. **First Steps** — a wide, forgiving runway with a gentle bend. Pure rolling
-   and jumping. A forgiving intro.
-2. **Ups and Downs** — ramps launch you, a boost pad carries you across a gap,
-   and a moving bridge spans the void. Melons tempt you off the safe line.
-3. **Pinball Palace** — the showpiece. A zig-zag of narrow platforms, a bumper
-   arena to ricochet through, and two boost jumps over a big gap to a dramatic
-   goal pedestal ringed by glowing pillars.
+1. **First Roll** — a wide, forgiving field with gentle speed-bump ramps. Teaches
+   the tilt feel: lean forward to accelerate, back to brake.
+2. **Rise and Roll** — a big launch ramp you tilt up, two bumpers to ricochet off,
+   and a moving platform bridge. Bends so camera-relative steering matters.
+3. **Bank and Bump** — the showpiece. A course that bends left then right through a
+   bumper gauntlet, chained boost pads, a moving-platform hop, and a finale gate on
+   a raised pedestal ringed by glowing pillars.
 
 ---
 
@@ -182,8 +187,21 @@ godot --headless --script res://tools/ExportCapybara.cs
 - **`Palette.cs` remains the source of truth for colour** — the `.tres` files
   encode those exact values, and per-instance tinting reads from the palette via
   the level specs.
-- **Physics:** the ball is a `RigidBody3D` with a camera-relative steering model
-  and a hard speed cap for arcade feel; ground is detected via a shape query.
+- **Physics:** the ball is a `RigidBody3D` with a **custom integrator that tilts
+  gravity** based on input — the ball isn't pushed, it rolls down the tilted
+  "slope" via real momentum (authentic SMB feel). Tilt is camera-relative. Ground
+  is detected via a shape query; a soft speed cap keeps it arcade-tame.
+
+## 🎚️ Tuning the feel
+
+Tilt physics are subjective — open `CapyballBall.cs` and adjust the `[Export]`
+knobs at the top (visible in the Inspector too):
+
+- `MaxTiltDeg` (24) — steeper = more aggressive acceleration
+- `TiltSpeed` (9) — higher = tilt responds more instantly (lower = floatier)
+- `GravityScale` (2.0) — overall pull; heavier = snappier, lighter = drifty
+- `LinearDamp` (0.15) — rolling resistance; higher = coasts less
+- `MaxSpeed` (22) — soft cap on horizontal speed
 
 ---
 
