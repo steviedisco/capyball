@@ -1,0 +1,15 @@
+; Perimeter wall material — dark rail body with a bright top band (reads as a
+; guardrail). Tinted per-level via Assets.MaterialTinted().
+[gd_resource type="StandardMaterial3D" format=3 load_steps=3]
+
+[ext_resource type="Texture2D" path="res://assets/textures/rail_grape.png" id="1_rail"]
+
+[resource]
+albedo_color = Color(1, 1, 1, 1)
+albedo_texture = ExtResource("1_rail")
+roughness = 0.5
+metallic = 0.0
+emission_enabled = true
+emission = Color(1, 1, 1, 1)
+emission_energy_multiplier = 0.15
+texture_filter = 0

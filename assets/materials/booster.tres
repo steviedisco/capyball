@@ -1,10 +1,14 @@
-; Base material for boost pad plates. Tinted per-instance from the level spec.
-[gd_resource type="StandardMaterial3D" format=3 load_steps=2]
+; Boost pad plate — hazard stripes for a punchy arcade look. Tinted per-instance.
+[gd_resource type="StandardMaterial3D" format=3 load_steps=3]
+
+[ext_resource type="Texture2D" path="res://assets/textures/hazard_orange.png" id="1_hazard"]
 
 [resource]
-albedo_color = Color(1, 0.55, 0.20, 1)
+albedo_color = Color(1, 0.85, 0.4, 1)
+albedo_texture = ExtResource("1_hazard")
 roughness = 0.3
-metallic = 0.0
+metallic = 0.05
 emission_enabled = true
 emission = Color(1, 0.55, 0.20, 1)
-emission_energy_multiplier = 1.2
+emission_energy_multiplier = 1.0
+texture_filter = 0

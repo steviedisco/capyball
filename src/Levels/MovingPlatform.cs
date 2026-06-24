@@ -20,6 +20,7 @@ public partial class MovingPlatform : AnimatableBody3D
     {
         var faceMat = Assets.MaterialTinted("platform", Tint);
         faceMat.EmissionEnergyMultiplier = 0.3f;
+        Procedural.SetUvScale(faceMat, new Vector3(Size.X / 4f, Size.Y / 4f, Size.Z / 4f));
         var rimMat = Assets.MaterialTinted("platform_rim",
             new Color(Mathf.Min(1, Tint.R + 0.25f), Mathf.Min(1, Tint.G + 0.25f), Mathf.Min(1, Tint.B + 0.25f)));
         var mi = Procedural.PlatformBox(Size, faceMat, rimMat);

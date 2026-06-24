@@ -1,12 +1,19 @@
-; Base "candy" material for platforms/ramps/movers. Color is tinted per-instance
-; at runtime via Assets.MaterialTinted() — this sets the structure (emission,
-; roughness) and acts as the template.
-[gd_resource type="StandardMaterial3D" format=3 load_steps=2]
+; Base "candy" material for platforms. Uses the checker texture as albedo so
+; platforms read as detailed racetrack surfaces instead of flat boxes. White
+; albedo color lets Assets.MaterialTinted() recolour the checker per-level
+; (tint multiplies texture colour). Roughness low for a glossy candy sheen.
+[gd_resource type="StandardMaterial3D" format=3 load_steps=3]
+
+[ext_resource type="Texture2D" path="res://assets/textures/checker_mint.png" id="1_checker"]
 
 [resource]
 albedo_color = Color(1, 1, 1, 1)
-roughness = 0.35
-metallic = 0.0
+albedo_texture = ExtResource("1_checker")
+roughness = 0.3
+metallic = 0.05
+metallic_specular = 0.4
 emission_enabled = true
 emission = Color(1, 1, 1, 1)
-emission_energy_multiplier = 0.25
+emission_energy_multiplier = 0.12
+emission_operator = 0
+texture_filter = 0

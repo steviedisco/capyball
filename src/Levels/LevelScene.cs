@@ -37,11 +37,12 @@ public partial class LevelScene : Node3D
         Stage.BuildEnvironment(this, Spec.SkyTop, Spec.SkyBottom);
         Stage.BuildVoidPlane(this, y: -22f, size: 600f);
         Stage.AddDistantSparkles(this, count: 18, radius: 80f, height: 30f);
+        Stage.AddClouds(this, count: 7, radius: 90f, height: 45f);
 
         // Static platforms.
         foreach (var c in Spec.Chunks)
         {
-            var (faceMat, rimMat) = PlatformMaterials(c.Color, c.Emission);
+            var (faceMat, rimMat) = PlatformMaterials(c.Color, c.Emission, c.Size);
             var box = Procedural.PlatformBox(c.Size, faceMat, rimMat);
             var body = new StaticBody3D();
             body.AddChild(box);
@@ -54,7 +55,7 @@ public partial class LevelScene : Node3D
         // Ramps (rotated boxes).
         foreach (var r in Spec.Ramps)
         {
-            var (faceMat, rimMat) = PlatformMaterials(r.Color, 0.3f);
+            var (faceMat, rimMat) = PlatformMaterials(r.Color, 0.3f, r.Size);
             var box = Procedural.PlatformBox(r.Size, faceMat, rimMat);
             var body = new StaticBody3D();
             body.AddChild(box);
@@ -65,13 +66,16 @@ public partial class LevelScene : Node3D
             body.GlobalPosition = r.Pos;
         }
 
-        // Perimeter walls (chunky rails fencing the play area).
+        // Perimeter walls — guardrail look: dark body + bright cap rail.
         foreach (var w in Spec.Walls)
         {
-            var (faceMat, rimMat) = PlatformMaterials(w.Color, 0.15f);
-            var box = Procedural.PlatformBox(w.Size, faceMat, rimMat);
+            var bodyMat = Assets.MaterialTinted("wall", w.Color);
+            Procedural.SetUvScale(bodyMat, new Vector3(w.Size.X / 4f, 1, w.Size.Z / 4f));
+            var railMat = Assets.MaterialTinted("platform_rim",
+                new Color(Mathf.Min(1, w.Color.R + 0.3f), Mathf.Min(1, w.Color.G + 0.3f), Mathf.Min(1, w.Color.B + 0.3f)));
+            var seg = Procedural.WallSegment(w.Size, bodyMat, railMat);
             var body = new StaticBody3D();
-            body.AddChild(box);
+            body.AddChild(seg);
             var col = new CollisionShape3D { Shape = new BoxShape3D { Size = w.Size } };
             body.AddChild(col);
             AddChild(body);
@@ -212,11 +216,13 @@ public partial class LevelScene : Node3D
     }
 
     /// <summary>Builds a tinted face + brighter rim material pair for a platform,
-    /// each an independent instance so per-chunk colour never bleeds across platforms.</summary>
-    private static (Material face, Material rim) PlatformMaterials(Color color, float emission)
+    /// each an independent instance so per-chunk colour never bleeds across platforms.
+    /// UV tiling is set so the checker texture repeats roughly every 4 world units.</summary>
+    private static (Material face, Material rim) PlatformMaterials(Color color, float emission, Vector3 size)
     {
         var faceMat = Assets.MaterialTinted("platform", color);
         faceMat.EmissionEnergyMultiplier = emission;
+        Procedural.SetUvScale(faceMat, new Vector3(size.X / 4f, size.Y / 4f, size.Z / 4f));
         Color rimColor = new(
             Mathf.Min(1, color.R + 0.25f), Mathf.Min(1, color.G + 0.25f), Mathf.Min(1, color.B + 0.25f));
         var rimMat = Assets.MaterialTinted("platform_rim", rimColor);
