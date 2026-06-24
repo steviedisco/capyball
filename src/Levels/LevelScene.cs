@@ -43,12 +43,12 @@ public partial class LevelScene : Node3D
         {
             var (faceMat, rimMat) = PlatformMaterials(c.Color, c.Emission);
             var box = Procedural.PlatformBox(c.Size, faceMat, rimMat);
-            box.Position = c.Pos;
             var body = new StaticBody3D();
             body.AddChild(box);
             var col = new CollisionShape3D { Shape = new BoxShape3D { Size = c.Size } };
             body.AddChild(col);
             AddChild(body);
+            body.GlobalPosition = c.Pos;
         }
 
         // Ramps (rotated boxes).
@@ -56,13 +56,13 @@ public partial class LevelScene : Node3D
         {
             var (faceMat, rimMat) = PlatformMaterials(r.Color, 0.3f);
             var box = Procedural.PlatformBox(r.Size, faceMat, rimMat);
-            box.Position = r.Pos;
             var body = new StaticBody3D();
             body.AddChild(box);
             var col = new CollisionShape3D { Shape = new BoxShape3D { Size = r.Size } };
             body.AddChild(col);
             body.RotationDegrees = new Vector3(r.PitchDeg, r.YawDeg, 0);
             AddChild(body);
+            body.GlobalPosition = r.Pos;
         }
 
         // Moving platforms.
